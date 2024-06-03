@@ -2,6 +2,8 @@
 @inject TheHiveAWS.Helpers.HelperPathProvider HelperPathProvider
 @{
     var currentUser = Context.Session.GetObject<Usuario>("CurrentUser");
+    string UrlBucketPublicaciones = keysModel.BucketUrlPublicaciones;
+    string UrlBucketUsuarios = keysModel.BucketUrlUsuarios;
 }
 
 @model Usuario
@@ -137,11 +139,11 @@
                             <a asp-controller="Perfil" asp-action="VerPerfil" asp-route-otherUser="@currentUser.Username">
                                 @if (currentUser != null && !string.IsNullOrEmpty(currentUser.FotoPerfil))
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath(@currentUser.FotoPerfil, Folders.Usuarios)" class="profile-pic" />
+                                    <img src="@UrlBucketUsuarios@currentUser.FotoPerfil" class="profile-pic" />
                                 }
                                 else
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath("default.jpg", Folders.Usuarios)" class="profile-pic" />
+                                    <img src="@($"{UrlBucketUsuarios}default.jpg")" class="profile-pic" />
                                 }
                             </a>
                         </li>

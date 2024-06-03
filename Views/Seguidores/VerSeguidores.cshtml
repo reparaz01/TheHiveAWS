@@ -2,6 +2,8 @@
 @inject TheHiveAWS.Helpers.HelperPathProvider HelperPathProvider
 @{
     var currentUser = Context.Session.GetObject<Usuario>("CurrentUser");
+    string UrlBucketPublicaciones = keysModel.BucketUrlPublicaciones;
+    string UrlBucketUsuarios = keysModel.BucketUrlUsuarios;
 }
 
 @model List<Usuario>
@@ -169,11 +171,11 @@
                             <a asp-controller="Perfil" asp-action="VerPerfil" asp-route-otherUser="@currentUser.Username">
                                 @if (currentUser != null && !string.IsNullOrEmpty(currentUser.FotoPerfil))
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath(@currentUser.FotoPerfil, Folders.Usuarios)" class="profile-pic" />
+                                    <img src="@UrlBucketUsuarios@currentUser.FotoPerfil" class="profile-pic" />
                                 }
                                 else
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath("default.jpg", Folders.Usuarios)" class="profile-pic" />
+                                    <img src="@($"{UrlBucketUsuarios}default.jpg")" class="profile-pic" />
                                 }
                             </a>
                         </li>
@@ -200,11 +202,11 @@
                                         <td>
                                             @if (!string.IsNullOrEmpty(seguidor.FotoPerfil))
                                             {
-                                                <img src="@HelperPathProvider.MapUrlPath(seguidor.FotoPerfil, Folders.Usuarios)" class="fotoperfil" style="border: 1px solid #ccc" />
+                                                <img src="@UrlBucketUsuarios@seguidor.FotoPerfil" class="fotoperfil" style="border: 1px solid #ccc" />
                                             }
                                             else
                                             {
-                                                <img src="@HelperPathProvider.MapUrlPath("default.jpg", Folders.Usuarios)" class="fotoperfil" />
+                                                <img src="@($"{UrlBucketUsuarios}default.jpg")" class="fotoperfil" />
                                             }
                                             <a asp-controller="Perfil" asp-action="VerPerfil" asp-route-otherUser="@seguidor.Username" class="username">@seguidor.Username</a>
                                         </td>

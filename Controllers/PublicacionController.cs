@@ -1,24 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TheHiveAWS.Extensions;
-using TheHiveAWS.Helpers;
 using TheHiveAWS.Models;
 using TheHiveAWS.Services;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace TheHiveAWS.Controllers
 {
     public class PublicacionController : Controller
     {
+        private readonly ServiceApiTheHive service;
+        private readonly ServiceStorageAWS storageService;
+        private readonly KeysModel keys;
 
-        private HelperPathProvider helper;
-        private ServiceApiTheHive service;
-
-        public PublicacionController(HelperPathProvider helper, ServiceApiTheHive service)
+        public PublicacionController(ServiceApiTheHive service, ServiceStorageAWS storageService, KeysModel keys)
         {
-            this.helper = helper;
             this.service = service;
-
+            this.storageService = storageService;
+            this.keys = keys;
         }
-
 
         public IActionResult Publicar()
         {
@@ -30,34 +32,35 @@ namespace TheHiveAWS.Controllers
         {
             var currentUser = HttpContext.Session.GetObject<Usuario>("CurrentUser");
 
-            
             Publicacion nuevaPublicacion = new Publicacion
             {
                 Texto = string.IsNullOrEmpty(publicacion.Texto) ? "" : publicacion.Texto,
-                FechaPublicacion = DateTime.Now, 
+                FechaPublicacion = DateTime.Now,
                 Username = currentUser.Username
             };
 
             if (imagen != null && imagen.Length > 0)
             {
                 int nextId = await this.service.GetNextPublicacionId();
-
                 string fileName = "imagen" + nextId.ToString() + ".jpeg";
 
-                string path = this.helper.MapPath(fileName, Folders.Publicaciones);
-                using (Stream stream = new FileStream(path, FileMode.Create))
+                using (Stream stream = imagen.OpenReadStream())
                 {
-                    await imagen.CopyToAsync(stream);
+                    bool uploadSuccess = await this.storageService.UploadFileAsync(fileName, stream);
+                    if (!uploadSuccess)
+                    {
+                        // Handle upload failure (e.g., return an error view)
+                        return View("Error");
+                    }
                 }
 
-                
-                nuevaPublicacion.Imagen = fileName;
-                nuevaPublicacion.TipoPublicacion = 2; 
+                nuevaPublicacion.Imagen = fileName; 
+                nuevaPublicacion.TipoPublicacion = 2;
             }
             else
             {
-                nuevaPublicacion.Imagen = ""; 
-                nuevaPublicacion.TipoPublicacion = 1; 
+                nuevaPublicacion.Imagen = "";
+                nuevaPublicacion.TipoPublicacion = 1;
             }
 
             nuevaPublicacion.FotoPerfil = currentUser.FotoPerfil;
@@ -66,9 +69,5 @@ namespace TheHiveAWS.Controllers
 
             return RedirectToAction("Index", "Home");
         }
-
-
-
-
     }
 }

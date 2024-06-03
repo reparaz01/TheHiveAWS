@@ -1,29 +1,29 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using TheHiveAWS.Extensions;
-using TheHiveAWS.Helpers;
 using TheHiveAWS.Models;
 using TheHiveAWS.Services;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Http;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace TheHiveAWS.Controllers
 {
     public class EditarPerfilController : Controller
     {
-        private HelperPathProvider helper;
-        private ServiceApiTheHive service;
+        private readonly ServiceApiTheHive service;
+        private readonly ServiceStorageAWS storageService;
+        private readonly KeysModel keys;
 
-        public EditarPerfilController(HelperPathProvider helper, ServiceApiTheHive service)
+        public EditarPerfilController(ServiceApiTheHive service, ServiceStorageAWS storageService, KeysModel keys)
         {
-            this.helper = helper;
             this.service = service;
-
+            this.storageService = storageService;
+            this.keys = keys;
         }
-
-
 
         public async Task<IActionResult> EditarPerfil()
         {
-
             var currentUser = HttpContext.Session.GetObject<Usuario>("CurrentUser");
 
             HttpContext.Session.Remove("OtherUser");
@@ -35,33 +35,32 @@ namespace TheHiveAWS.Controllers
 
             Usuario user = await this.service.FindUsuario(currentUser.Username);
 
-
-            return View();
+            return View(user);
         }
 
         [HttpPost]
         public async Task<IActionResult> EditarPerfil(Usuario usuario, IFormFile FotoPerfil)
         {
-
             var currentUser = HttpContext.Session.GetObject<Usuario>("CurrentUser");
 
             string nuevaFotoPerfil = null;
 
-
             if (FotoPerfil != null && FotoPerfil.Length > 0)
             {
-
                 string fileName = "img" + currentUser.Username + ".jpeg";
 
-                string path = this.helper.MapPath(fileName, Folders.Usuarios);
-                using (Stream stream = new FileStream(path, FileMode.Create))
+                using (Stream stream = FotoPerfil.OpenReadStream())
                 {
-                    await FotoPerfil.CopyToAsync(stream);
+                    bool uploadSuccess = await this.storageService.UploadUserProfilePictureAsync(fileName, stream);
+                    if (!uploadSuccess)
+                    {
+                        // Handle upload failure (e.g., return an error view)
+                        return View("Error");
+                    }
                 }
 
                 nuevaFotoPerfil = fileName;
             }
-
 
             Usuario perfilActualizado = new Usuario
             {
@@ -78,15 +77,11 @@ namespace TheHiveAWS.Controllers
 
             await this.service.UpdateUsuario(perfilActualizado);
 
-
-            var username = currentUser.Username;
-
             HttpContext.Session.Remove("CurrentUser");
-            Usuario user = await this.service.FindUsuario(username);
+            Usuario user = await this.service.FindUsuario(currentUser.Username);
             HttpContext.Session.SetObject("CurrentUser", user);
 
             return RedirectToAction("Index", "Home");
         }
-
     }
 }

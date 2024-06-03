@@ -3,6 +3,8 @@
 @{
     var currentUser = Context.Session.GetObject<Usuario>("CurrentUser");
     var otherUser = Context.Session.GetObject<Usuario>("OtherUser");
+    string UrlBucketPublicaciones = keysModel.BucketUrlPublicaciones;
+    string UrlBucketUsuarios = keysModel.BucketUrlUsuarios;
 }
 
 @model List<Publicacion>
@@ -254,11 +256,11 @@
                             <a asp-controller="Perfil" asp-action="VerPerfil" asp-route-otherUser="@currentUser.Username">
                                 @if (currentUser != null && !string.IsNullOrEmpty(currentUser.FotoPerfil))
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath(@currentUser.FotoPerfil, Folders.Usuarios)" class="profile-pic" />
+                                    <img src="@UrlBucketUsuarios@currentUser.FotoPerfil" class="profile-pic" />
                                 }
                                 else
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath("default.jpg", Folders.Usuarios)" class="profile-pic" />
+                                    <img src="@($"{UrlBucketUsuarios}default.jpg")" class="profile-pic" />
                                 }
                             </a>
                         </li>
@@ -283,11 +285,11 @@
                                         <div class="profile-img" style="text-align: left;">
                                             @if (otherUser != null && !string.IsNullOrEmpty(otherUser.FotoPerfil))
                                             {
-                                                <img src="@HelperPathProvider.MapUrlPath(@otherUser.FotoPerfil, Folders.Usuarios)" class="fotoperfil" style="border: 1px solid #ccc;" />
+                                                <img src="@UrlBucketUsuarios@otherUser.FotoPerfil" class="fotoperfil" style="border: 1px solid #ccc;" />
                                             }
                                             else
                                             {
-                                                <img src="@HelperPathProvider.MapUrlPath("default.jpg", Folders.Usuarios)" class="fotoperfil" />
+                                                <img src="@($"{UrlBucketUsuarios}default.jpg")" class="fotoperfil" />
                                             }
                                         </div>
                                     </div>
@@ -357,11 +359,11 @@
                             <a asp-controller="Perfil" asp-action="VerPerfil" asp-route-otherUser="@publicacion.Username" style="display: inline-flex; align-items: center;">
                                 @if (!string.IsNullOrEmpty(publicacion.FotoPerfil))
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath(publicacion.FotoPerfil, Folders.Usuarios)" style="width: 62px; height: 62px; border-radius: 50%; margin-right: 13px;margin-left: -15px;margin-top: -18px; border: 1px solid #ccc; box-sizing: border-box; transition: transform 0.2s;" class="verperfil" />
+                                    <img src="@UrlBucketUsuarios@publicacion.FotoPerfil" style="width: 62px; height: 62px; border-radius: 50%; margin-right: 13px;margin-left: -15px;margin-top: -18px; border: 1px solid #ccc; box-sizing: border-box; transition: transform 0.2s;" class="verperfil" />
                                 }
                                 else
                                 {
-                                    <img src="@HelperPathProvider.MapUrlPath("default.jpg", Folders.Usuarios)" style="width: 62px; height: 62px; border-radius: 50%; margin-right: 7px;margin-left: -23px;margin-top: -23px; border: 2px solid white; padding: 2px; box-sizing: border-box; transition: transform 0.2s;" class="verperfil" />
+                                    <img src="@($"{UrlBucketUsuarios}default.jpg")" style="width: 62px; height: 62px; border-radius: 50%; margin-right: 7px;margin-left: -23px;margin-top: -23px; border: 2px solid white; padding: 2px; box-sizing: border-box; transition: transform 0.2s;" class="verperfil" />
                                 }
                                 <p class="nombreperfil">@publicacion.Username</p>
                             </a>
@@ -392,7 +394,7 @@
                         else if (publicacion.TipoPublicacion == 2)
                         {
                             <h5 style="margin-bottom: 12px;margin-top: 4vh">@publicacion.Texto</h5>
-                            <img src="@HelperPathProvider.MapUrlPath(publicacion.Imagen, Folders.Publicaciones)" style="width: 100%; height: auto;" />
+                            <img src="@UrlBucketPublicaciones@publicacion.Imagen" style="width: 100%; height: auto;" />
 
                             <h5 id="likes_@publicacion.IdPublicacion" style="color:dodgerblue;margin-top: 5px; margin-bottom:-10px; margin-left: -17.5px">@ViewBag.LikesPorPublicacion[publicacion.IdPublicacion] likes</h5>
                         }
